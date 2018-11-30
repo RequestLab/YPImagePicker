@@ -125,7 +125,7 @@ class ExampleViewController: UIViewController {
         config.video.libraryTimeLimit = 500.0
 
         /* Adds a Crop step in the photo taking process, after filters. Defaults to .none */
-        config.showsCrop = .rectangle(ratio: (16/9))
+//        config.showsCrop = .rectangle(ratio: (16/9))
 
         /* Defines the overlay view for the camera. Defaults to UIView(). */
         // let overlayView = UIView()
@@ -170,6 +170,8 @@ class ExampleViewController: UIViewController {
         //config.library.options = options
 
         config.library.skipSelectionsGallery = true
+        config.shouldSaveNewPicturesToAlbum = true
+        config.showsFilters = false
         let picker = YPImagePicker(selected: selectedItems, configuration: config)
         
 

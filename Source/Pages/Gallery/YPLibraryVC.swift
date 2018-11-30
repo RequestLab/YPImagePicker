@@ -10,7 +10,8 @@ import UIKit
 import Photos
 
 public class YPLibraryVC: UIViewController, YPPermissionCheckable {
-    
+
+    private var selected: [YPMediaItem] = []
     internal weak var delegate: YPLibraryViewDelegate?
     internal var v: YPLibraryView!
     internal var isProcessing = false // true if video or image is in processing state
@@ -23,36 +24,26 @@ public class YPLibraryVC: UIViewController, YPPermissionCheckable {
     internal let panGestureHelper = PanGestureHelper()
 
     // MARK: - Init
-    
+
     public convenience init(selected: [YPMediaItem]) {
         self.init()
-        let mapped: [YPLibrarySelection?] = selected.map {
-            switch $0 {
-            case let .photo(p):
-                return p.selection
-            case .video:
-                return nil
-            }
-        }
-        let filtered = mapped.filter { $0 != nil} as! [YPLibrarySelection]
-        selection = filtered
-        multipleSelectionEnabled = true
+        self.selected = selected
     }
 
     public required init() {
         super.init(nibName: nil, bundle: nil)
         title = YPConfig.wordings.libraryTitle
     }
-
+    
     public required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+
     func setAlbum(_ album: YPAlbum) {
         mediaManager.collection = album.collection
         resetMultipleSelection()
     }
-    
+
     private func resetMultipleSelection() {
         selection.removeAll()
         currentlySelectedIndex = 0
@@ -61,7 +52,7 @@ public class YPLibraryVC: UIViewController, YPPermissionCheckable {
         delegate?.libraryViewDidToggleMultipleSelection(enabled: false)
         checkLimit()
     }
-    
+
     func initialize() {
         mediaManager.initialize()
         mediaManager.v = v
@@ -69,15 +60,30 @@ public class YPLibraryVC: UIViewController, YPPermissionCheckable {
         if mediaManager.fetchResult != nil {
             return
         }
-        
+
         setupCollectionView()
         registerForLibraryChanges()
         panGestureHelper.registerForPanGesture(on: v)
         registerForTapOnPreview()
         refreshMediaRequest()
-        
+
         v.assetViewContainer.multipleSelectionButton.isHidden = !(YPConfig.library.maxNumberOfItems > 1)
         v.maxNumberWarningLabel.text = String(format: YPConfig.wordings.warningMaxItemsLimit, YPConfig.library.maxNumberOfItems)
+
+        let mapped: [YPLibrarySelection?] = selected.map {
+                        switch $0 {
+                        case let .photo(p):
+                            guard let asset = p.asset else { return nil }
+                            let idx = mediaManager.fetchResult.index(of: asset)
+                            if idx == NSNotFound { return nil }
+                            let selection = YPLibrarySelection(index: idx, cropRect: p.selection?.cropRect, scrollViewContentOffset: p.selection?.scrollViewContentOffset, scrollViewZoomScale: p.selection?.scrollViewZoomScale)
+                            return selection
+                        case .video:
+                            return nil
+                        }
+                    }
+        let filtered = mapped.filter { $0 != nil } as! [YPLibrarySelection]
+        selection = filtered
     }
     
     // MARK: - View Lifecycle
@@ -468,7 +474,7 @@ public class YPLibraryVC: UIViewController, YPPermissionCheckable {
                             self.delegate?.libraryViewFinishedLoading()
                             let photo = YPMediaPhoto(image: image.resizedImageIfNeeded(),
                                                      exifMeta: exifMeta,
-                                                     asset: asset, selection: self.selection.first!)
+                                                     asset: asset, selection: self.selection.first)
                             photoCallback(photo)
                         }
                     }

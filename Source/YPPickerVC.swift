@@ -44,8 +44,8 @@ public class YPPickerVC: YPBottomPager, YPBottomPagerDelegate {
     
     var capturedImage: UIImage?
 
-    public convenience init() {
-        self.init(selected: [])
+    public init() {
+        super.init(nibName: nil, bundle: nil)
     }
 
     public init(selected: [YPMediaItem]) {
