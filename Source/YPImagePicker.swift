@@ -16,6 +16,7 @@ public protocol YPImagePickerDelegate: AnyObject {
 
 public class YPImagePicker: UINavigationController {
     
+    private var selected: [YPMediaItem] = []
     private var _didFinishPicking: (([YPMediaItem], Bool) -> Void)?
     public func didFinishPicking(completion: @escaping (_ items: [YPMediaItem], _ cancelled: Bool) -> Void) {
         _didFinishPicking = completion
@@ -29,7 +30,7 @@ public class YPImagePicker: UINavigationController {
     // This nifty little trick enables us to call the single version of the callbacks.
     // This keeps the backwards compatibility keeps the api as simple as possible.
     // Multiple selection becomes available as an opt-in.
-    private func didSelect(items: [YPMediaItem]) {
+    private func didSelect(_ selection: [YPMediaItem] = [], items: [YPMediaItem]) {
         _didFinishPicking?(items, false)
     }
     
@@ -48,7 +49,15 @@ public class YPImagePicker: UINavigationController {
         super.init(nibName: nil, bundle: nil)
         picker.imagePickerDelegate = self
     }
-    
+
+    public init(selected: [YPMediaItem], configuration: YPImagePickerConfiguration) {
+        YPImagePickerConfiguration.shared = configuration
+        self.selected = selected
+        picker = YPPickerVC(selected: selected)
+        super.init(nibName: nil, bundle: nil)
+        picker.imagePickerDelegate = self
+    }
+
     public required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }

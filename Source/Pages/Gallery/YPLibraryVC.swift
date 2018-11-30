@@ -24,11 +24,26 @@ public class YPLibraryVC: UIViewController, YPPermissionCheckable {
 
     // MARK: - Init
     
+    public convenience init(selected: [YPMediaItem]) {
+        self.init()
+        let mapped: [YPLibrarySelection?] = selected.map {
+            switch $0 {
+            case let .photo(p):
+                return p.selection
+            case .video:
+                return nil
+            }
+        }
+        let filtered = mapped.filter { $0 != nil} as! [YPLibrarySelection]
+        selection = filtered
+        multipleSelectionEnabled = true
+    }
+
     public required init() {
         super.init(nibName: nil, bundle: nil)
         title = YPConfig.wordings.libraryTitle
     }
-    
+
     public required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -408,13 +423,13 @@ public class YPLibraryVC: UIViewController, YPPermissionCheckable {
                 var resultMediaItems: [YPMediaItem] = []
                 let asyncGroup = DispatchGroup()
                 
-                for asset in selectedAssets {
+                for (index, asset) in selectedAssets.enumerated() {
                     asyncGroup.enter()
                     
                     switch asset.asset.mediaType {
                     case .image:
                         self.fetchImageAndCrop(for: asset.asset, withCropRect: asset.cropRect) { image, exifMeta in
-                            let photo = YPMediaPhoto(image: image.resizedImageIfNeeded(), exifMeta: exifMeta, asset: asset.asset)
+                            let photo = YPMediaPhoto(image: image.resizedImageIfNeeded(), exifMeta: exifMeta, asset: asset.asset, selection: self.selection[index])
                             resultMediaItems.append(YPMediaItem.photo(p: photo))
                             asyncGroup.leave()
                         }
@@ -453,7 +468,7 @@ public class YPLibraryVC: UIViewController, YPPermissionCheckable {
                             self.delegate?.libraryViewFinishedLoading()
                             let photo = YPMediaPhoto(image: image.resizedImageIfNeeded(),
                                                      exifMeta: exifMeta,
-                                                     asset: asset)
+                                                     asset: asset, selection: self.selection.first!)
                             photoCallback(photo)
                         }
                     }

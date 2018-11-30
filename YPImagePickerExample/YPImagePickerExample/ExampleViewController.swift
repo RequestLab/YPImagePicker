@@ -169,7 +169,9 @@ class ExampleViewController: UIViewController {
         //
         //config.library.options = options
 
-        let picker = YPImagePicker(configuration: config)
+        config.library.skipSelectionsGallery = true
+        let picker = YPImagePicker(selected: selectedItems, configuration: config)
+        
 
         /* Change configuration directly */
         // YPImagePickerConfiguration.shared.wordings.libraryTitle = "Gallery2"
