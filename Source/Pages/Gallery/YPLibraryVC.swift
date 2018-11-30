@@ -84,6 +84,9 @@ public class YPLibraryVC: UIViewController, YPPermissionCheckable {
                     }
         let filtered = mapped.filter { $0 != nil } as! [YPLibrarySelection]
         selection = filtered
+        if selection.count > 1 {
+            multipleSelectionButtonTapped()
+        }
     }
     
     // MARK: - View Lifecycle
