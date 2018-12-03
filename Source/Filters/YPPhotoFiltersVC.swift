@@ -28,6 +28,7 @@ open class YPPhotoFiltersVC: UIViewController, IsMediaFilterVC, UIGestureRecogni
     public var didSave: ((YPMediaItem) -> Void)?
     public var didCancel: (() -> Void)?
 
+
     fileprivate let filters: [YPFilter] = YPConfig.filters
 
     fileprivate var selectedFilter: YPFilter?
