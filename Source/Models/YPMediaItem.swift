@@ -11,18 +11,17 @@ import Foundation
 import AVFoundation
 import Photos
 
-
 public class YPMediaPhoto {
     
     public var image: UIImage { return modifiedImage ?? originalImage }
     public let originalImage: UIImage
     public var modifiedImage: UIImage?
     public let fromCamera: Bool
-    public let exifMeta : [String : Any]?
+    public let exifMeta: [String: Any]?
     public var asset: PHAsset?
-    internal var selection: YPLibrarySelection? = nil
+    internal var selection: YPLibrarySelection?
     
-    init(image: UIImage, exifMeta : [String : Any]? = nil, fromCamera: Bool = false, asset: PHAsset? = nil, selection: YPLibrarySelection? = nil) {
+    init(image: UIImage, exifMeta: [String: Any]? = nil, fromCamera: Bool = false, asset: PHAsset? = nil, selection: YPLibrarySelection? = nil) {
         self.originalImage = image
         self.modifiedImage = nil
         self.fromCamera = fromCamera
