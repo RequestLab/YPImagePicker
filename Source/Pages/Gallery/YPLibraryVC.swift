@@ -65,8 +65,21 @@ public class YPLibraryVC: UIViewController, YPPermissionCheckable {
         registerForLibraryChanges()
         panGestureHelper.registerForPanGesture(on: v)
         registerForTapOnPreview()
-        refreshMediaRequest()
+
+        let options = buildPHFetchOptions()
+        if let collection = mediaManager.collection {
+            mediaManager.fetchResult = PHAsset.fetchAssets(in: collection, options: options)
+        } else {
+            mediaManager.fetchResult = PHAsset.fetchAssets(with: options)
+        }
         
+        if mediaManager.fetchResult.count > 0 {
+            v.collectionView.reloadData()
+        } else {
+            delegate?.noPhotosForOptions()
+        }
+        scrollToTop()
+
         v.assetViewContainer.multipleSelectionButton.isHidden = !(YPConfig.library.maxNumberOfItems > 1)
         v.maxNumberWarningLabel.text = String(format: YPConfig.wordings.warningMaxItemsLimit, YPConfig.library.maxNumberOfItems)
 
@@ -88,10 +101,19 @@ public class YPLibraryVC: UIViewController, YPPermissionCheckable {
         let filtered = mapped.filter { $0 != nil } as? [YPLibrarySelection]
         if let filtered = filtered {
             selection = filtered
-            if selection.count > 1 {
-                multipleSelectionButtonTapped()
-            } else if selection.count == 1 {// switch case
+            switch selection.count {
+            case 1 :
                 currentlySelectedIndex = selection[0].index
+                if let asset = selected.singlePhoto?.asset { changeAsset(asset) }
+            case 2... :
+                currentlySelectedIndex = selection[0].index
+                if let asset = selected.singlePhoto?.asset { changeAsset(asset) }
+                multipleSelectionButtonTapped()
+            default:
+                changeAsset(mediaManager.fetchResult[0])
+                v.collectionView.selectItem(at: IndexPath(row: 0, section: 0),
+                        animated: false,
+                        scrollPosition: UICollectionView.ScrollPosition())
             }
         }
     }
@@ -265,7 +287,7 @@ public class YPLibraryVC: UIViewController, YPPermissionCheckable {
         } else {
             mediaManager.fetchResult = PHAsset.fetchAssets(with: options)
         }
-                
+        
         if mediaManager.fetchResult.count > 0 {
             changeAsset(mediaManager.fetchResult[0])
             v.collectionView.reloadData()
