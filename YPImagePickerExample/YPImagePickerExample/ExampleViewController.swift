@@ -169,7 +169,6 @@ class ExampleViewController: UIViewController {
         //config.library.options = options
 
         config.library.skipSelectionsGallery = true
-        config.shouldSaveNewPicturesToAlbum = true
         config.showsFilters = false
         let picker = YPImagePicker(selected: selectedItems, configuration: config)
 

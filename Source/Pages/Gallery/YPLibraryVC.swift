@@ -90,6 +90,8 @@ public class YPLibraryVC: UIViewController, YPPermissionCheckable {
             selection = filtered
             if selection.count > 1 {
                 multipleSelectionButtonTapped()
+            } else if selection.count == 1 {// switch case
+                currentlySelectedIndex = selection[0].index
             }
         }
     }
@@ -173,12 +175,7 @@ public class YPLibraryVC: UIViewController, YPPermissionCheckable {
 
         if multipleSelectionEnabled {
             if selection.isEmpty {
-                selection = [
-                    YPLibrarySelection(index: currentlySelectedIndex,
-                                       cropRect: v.currentCropRect(),
-                                       scrollViewContentOffset: v.assetZoomableView!.contentOffset,
-                                       scrollViewZoomScale: v.assetZoomableView!.zoomScale)
-                ]
+                selection = [currentSelection()]
             }
         } else {
             selection.removeAll()
@@ -189,7 +186,14 @@ public class YPLibraryVC: UIViewController, YPPermissionCheckable {
         checkLimit()
         delegate?.libraryViewDidToggleMultipleSelection(enabled: multipleSelectionEnabled)
     }
-    
+
+    private func currentSelection() -> YPLibrarySelection {
+        return YPLibrarySelection(index: currentlySelectedIndex,
+                cropRect: v.currentCropRect(),
+                scrollViewContentOffset: v.assetZoomableView!.contentOffset,
+                scrollViewZoomScale: v.assetZoomableView!.zoomScale)
+    }
+
     // MARK: - Tap Preview
     
     func registerForTapOnPreview() {
@@ -482,7 +486,8 @@ public class YPLibraryVC: UIViewController, YPPermissionCheckable {
                             self.delegate?.libraryViewFinishedLoading()
                             let photo = YPMediaPhoto(image: image.resizedImageIfNeeded(),
                                                      exifMeta: exifMeta,
-                                                     asset: asset, selection: self.selection.first)
+                                                     asset: asset,
+                                                     selection: self.currentSelection())
                             photoCallback(photo)
                         }
                     }
