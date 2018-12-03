@@ -76,16 +76,21 @@ public class YPLibraryVC: UIViewController, YPPermissionCheckable {
                             guard let asset = p.asset else { return nil }
                             let idx = mediaManager.fetchResult.index(of: asset)
                             if idx == NSNotFound { return nil }
-                            let selection = YPLibrarySelection(index: idx, cropRect: p.selection?.cropRect, scrollViewContentOffset: p.selection?.scrollViewContentOffset, scrollViewZoomScale: p.selection?.scrollViewZoomScale)
+                            let selection = YPLibrarySelection(index: idx,
+                                                               cropRect: p.selection?.cropRect,
+                                                               scrollViewContentOffset: p.selection?.scrollViewContentOffset,
+                                                               scrollViewZoomScale: p.selection?.scrollViewZoomScale)
                             return selection
                         case .video:
                             return nil
                         }
                     }
-        let filtered = mapped.filter { $0 != nil } as! [YPLibrarySelection]
-        selection = filtered
-        if selection.count > 1 {
-            multipleSelectionButtonTapped()
+        let filtered = mapped.filter { $0 != nil } as? [YPLibrarySelection]
+        if let filtered = filtered {
+            selection = filtered
+            if selection.count > 1 {
+                multipleSelectionButtonTapped()
+            }
         }
     }
     
